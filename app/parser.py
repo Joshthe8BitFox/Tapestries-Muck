@@ -199,8 +199,8 @@ class LineParser:
             return False
         if len(username) < 3:
             return False
-        # MUCK names normally start with a letter and contain no spaces.
-        return bool(re.fullmatch(r"[A-Za-z][A-Za-z0-9_\-'`]*", username))
+        # MUCK names contain no spaces and may be styled with leading underscores.
+        return bool(re.fullmatch(r"[A-Za-z_][A-Za-z0-9_\-'`]*", username))
 
 
     def is_who_line(self, line: str) -> bool:
@@ -253,7 +253,7 @@ class LineParser:
         users: list[tuple[str, str | None]] = []
         for piece in names_text.split(","):
             name = piece.strip()
-            match = re.match(r"^([A-Za-z][A-Za-z0-9_\-'`]*)\b", name)
+            match = re.match(r"^([A-Za-z_][A-Za-z0-9_\-'`]*)\b", name)
             if not match:
                 continue
             username = match.group(1)
@@ -285,7 +285,7 @@ class LineParser:
         # Match the first table columns only. The species column may contain
         # spaces, so it is deliberately ignored after the gender field.
         match = re.match(
-            r"^\s*([A-Za-z][A-Za-z0-9_\-'`]*)\s+\S+\s+(?:(?:---|--)\s+)?([A-Za-z]+)\b",
+            r"^\s*([A-Za-z_][A-Za-z0-9_\-'`]*)\s+\S+\s+(?:(?:---|--)\s+)?([A-Za-z]+)\b",
             line,
         )
         if not match:
