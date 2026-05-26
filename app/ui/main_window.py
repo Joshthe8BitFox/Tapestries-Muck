@@ -31,6 +31,7 @@ from ..database import Database
 from ..network import MuckConnection
 from ..parser import KeywordRule, LineParser, ParsedLine
 from ..settings_store import ClientSettings, SettingsStore
+from ..version import __version__
 
 
 URL_PATTERN = re.compile(r"\b(?:https?://|www\.)[^\s<>()]+[^\s<>().,!?:;'\"]", re.IGNORECASE)
@@ -547,7 +548,7 @@ class MainWindow(QMainWindow):
         self._background_who_interval_ms = 15_000
         self._output_auto_scroll = True
         self._updating_output_scroll = False
-        self.setWindowTitle("Tapestries MUCK Client")
+        self.setWindowTitle(f"Tapestries MUCK Client v{__version__}")
         self.resize(1100, 760)
         self._build_ui()
         self._wire_signals()

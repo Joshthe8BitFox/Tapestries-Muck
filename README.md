@@ -2,6 +2,8 @@
 
 A small cross-platform desktop client for Tapestries MUCK, written in Python with PySide6.
 
+Current version: `0.2.0`
+
 ## Features
 
 - PySide6 desktop UI for connecting to Tapestries MUCK.

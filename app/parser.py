@@ -219,6 +219,7 @@ class LineParser:
             or lowered.startswith("the sleepers here are ")
             or lowered.startswith("the sleeper here is ")
             or lowered == "you are the only one awake here."
+            or lowered == "there are no sleepers here."
         )
 
     def try_parse_who_line(self, line: str) -> list[tuple[str, str | None]]:
