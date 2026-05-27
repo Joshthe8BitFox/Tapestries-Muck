@@ -218,7 +218,7 @@ class LineParser:
             or lowered.startswith("the player awake here is ")
             or lowered.startswith("the sleepers here are ")
             or lowered.startswith("the sleeper here is ")
-            or bool(re.match(r"^only\s+[a-z_][a-z0-9_\-'`]*\s+is asleep here\.$", lowered))
+            or bool(re.match(r"^only\s+.+\s+(?:is|are) asleep here\.$", lowered))
             or lowered == "you are the only one awake here."
             or lowered == "there are no sleepers here."
         )
@@ -244,7 +244,7 @@ class LineParser:
             if lowered.startswith(prefix):
                 names_text = stripped[len(prefix):]
                 break
-        only_asleep_match = re.match(r"^only\s+([A-Za-z_][A-Za-z0-9_\-'`]*)\s+is asleep here\.$", stripped, flags=re.IGNORECASE)
+        only_asleep_match = re.match(r"^only\s+(.+)\s+(?:is|are) asleep here\.$", stripped, flags=re.IGNORECASE)
         if only_asleep_match:
             names_text = only_asleep_match.group(1)
 
