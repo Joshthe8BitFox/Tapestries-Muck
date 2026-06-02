@@ -6,7 +6,7 @@ Current version: `0.2.0`
 
 ## Windows Download
 
-If setting up Python feels like too much fuss, there is a compiled Windows build on the GitHub Releases page. Download the latest `windows-x64.zip`, extract it, and run `Tapestries-MUCK-Client.exe`.
+If setting up Python feels like too much fuss, there is a compiled Windows build on the GitHub Releases page. Download `Tapestries-MUCK-Client-v0.2.0-windows-x64.zip`, extract it, and run `Tapestries-MUCK-Client.exe`.
 
 ## Contact
 
