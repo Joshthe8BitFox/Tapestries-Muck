@@ -19,6 +19,7 @@ env/
 build/
 dist/
 *.egg-info/
+*.spec
 
 # Test and tooling caches
 .pytest_cache/
