@@ -6,6 +6,7 @@ from PySide6.QtCore import QEvent, Qt, QTimer, QUrl
 from PySide6.QtGui import QAction, QColor, QDesktopServices, QFont, QFontDatabase, QKeyEvent, QTextCharFormat, QTextCursor
 from PySide6.QtWidgets import (
     QCheckBox,
+    QApplication,
     QColorDialog,
     QDialog,
     QDialogButtonBox,
@@ -736,9 +737,7 @@ class MainWindow(QMainWindow):
             self._insert_text_with_links(cursor, line, self._format_for_style(whole_line_style))
             cursor.insertText("\n", plain_fmt)
             self._finish_output_append(cursor, was_at_bottom, previous_scroll)
-            if parsed.is_whisper or parsed.is_page or parsed.is_look_or_smell or parsed.mentions_self:
-                self.raise_()
-                self.activateWindow()
+            self._request_attention(parsed)
             return
 
         current = 0
@@ -761,9 +760,11 @@ class MainWindow(QMainWindow):
             self._insert_text_with_links(cursor, line[current:], plain_fmt)
         cursor.insertText("\n", plain_fmt)
         self._finish_output_append(cursor, was_at_bottom, previous_scroll)
+        self._request_attention(parsed)
+
+    def _request_attention(self, parsed: ParsedLine) -> None:
         if parsed.is_whisper or parsed.is_page or parsed.is_look_or_smell or parsed.mentions_self:
-            self.raise_()
-            self.activateWindow()
+            QApplication.alert(self, 0)
 
     def _output_is_scrolled_to_bottom(self) -> bool:
         scroll_bar = self.output.verticalScrollBar()
