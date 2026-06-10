@@ -149,6 +149,7 @@ class LineParser:
         return (
             (" pages:" in lower and ("/to you" in lower or " to you" in lower))
             or (" pages," in lower and " to you" in lower)
+            or bool(re.match(r"^in an? page-pose to you\b", lower))
         ) and not lower.startswith("you page")
 
     def _is_sent_page(self, lower: str) -> bool:

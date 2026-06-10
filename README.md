@@ -2,11 +2,14 @@
 
 A small cross-platform desktop client for Tapestries MUCK, written in Python with PySide6.
 
-Current version: `0.2.0`
+Current version: `0.2.1`
 
-## Windows Download
+## Downloads
 
-If setting up Python feels like too much fuss, there is a compiled Windows build on the GitHub Releases page. Download `Tapestries-MUCK-Client-v0.2.0-windows-x64.zip`, extract it, and run `Tapestries-MUCK-Client.exe`.
+If setting up Python feels like too much fuss, compiled builds are available on the GitHub Releases page.
+
+- macOS Apple Silicon: download `Tapestries-MUCK-Client-v0.2.1-macos-arm64.dmg`, open it, and drag the app to Applications.
+- Windows: download `Tapestries-MUCK-Client-v0.2.0-windows-x64.zip`, extract it, and run `Tapestries-MUCK-Client.exe`.
 
 ## Contact
 
