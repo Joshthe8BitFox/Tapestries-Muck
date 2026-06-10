@@ -1,12 +1,45 @@
 from __future__ import annotations
 
+import os
+import sys
 import sqlite3
 from pathlib import Path
 
 
+APP_NAME = "Tapestries MUCK Client"
+
+
+def _is_frozen_app() -> bool:
+    return bool(getattr(sys, "frozen", False))
+
+
+def _user_data_dir() -> Path:
+    if sys.platform == "darwin":
+        return Path.home() / "Library" / "Application Support" / APP_NAME
+    if sys.platform == "win32":
+        base = os.environ.get("APPDATA")
+        if base:
+            return Path(base) / APP_NAME
+        return Path.home() / "AppData" / "Roaming" / APP_NAME
+
+    base = os.environ.get("XDG_DATA_HOME")
+    if base:
+        return Path(base) / APP_NAME
+    return Path.home() / ".local" / "share" / APP_NAME
+
+
+def resolve_database_path(path: str | Path = "client_data.sqlite3") -> Path:
+    db_path = Path(path)
+    if db_path.is_absolute() or not _is_frozen_app():
+        return db_path
+
+    return _user_data_dir() / db_path.name
+
+
 class Database:
     def __init__(self, path: str | Path = "client_data.sqlite3") -> None:
-        self.path = Path(path)
+        self.path = resolve_database_path(path)
+        self.path.parent.mkdir(parents=True, exist_ok=True)
         self.conn = sqlite3.connect(self.path)
         self.conn.row_factory = sqlite3.Row
         self._init_schema()

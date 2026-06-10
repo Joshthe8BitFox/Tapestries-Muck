@@ -25,6 +25,7 @@ dist/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
+.pyinstaller-cache/
 .coverage
 htmlcov/
 
