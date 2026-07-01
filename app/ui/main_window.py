@@ -36,6 +36,7 @@ from ..version import __version__
 
 
 URL_PATTERN = re.compile(r"\b(?:https?://|www\.)[^\s<>()]+[^\s<>().,!?:;'\"]", re.IGNORECASE)
+MAX_INPUT_LENGTH = 1000
 
 
 class ClickableOutputTextEdit(QTextEdit):
@@ -589,6 +590,7 @@ class MainWindow(QMainWindow):
 
         input_bar = QHBoxLayout()
         self.input_edit = CommandLineEdit()
+        self.input_edit.setMaxLength(MAX_INPUT_LENGTH)
         self.send_button = QPushButton("Send")
         input_bar.addWidget(self.input_edit, stretch=1)
         input_bar.addWidget(self.send_button)
