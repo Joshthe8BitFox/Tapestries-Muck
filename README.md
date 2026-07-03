@@ -1,5 +1,8 @@
 # Tapestries MUCK Client
 
+<img width="1680" height="1021" alt="image" src="https://github.com/user-attachments/assets/27d7915d-0c30-45dc-84f0-b57fffcfa0b5" />
+
+
 A small cross-platform desktop client for Tapestries MUCK, written in Python with PySide6.
 
 Current version: `0.2.2`
