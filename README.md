@@ -12,7 +12,7 @@ Current version: `0.2.2`
 If setting up Python feels like too much fuss, compiled builds are available on the GitHub Releases page.
 
 - macOS Apple Silicon: download `Tapestries-MUCK-Client-v0.2.2-macos-arm64.dmg`, open it, and drag the app to Applications.
-- Windows: download `Tapestries-MUCK-Client-v0.2.0-windows-x64.zip`, extract it, and run `Tapestries-MUCK-Client.exe`.
+- Windows: download `Tapestries-MUCK-Client-v0.2.2-windows-x64.zip`, extract it, and run `Tapestries-MUCK-Client.exe`.
 
 ## Contact
 
