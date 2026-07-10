@@ -87,6 +87,48 @@ class Database:
         )
         self.conn.commit()
 
+    def export_personal_data(self) -> dict:
+        return {
+            "settings": self.get_all_settings(),
+            "keywords": [dict(row) for row in self.list_keywords()],
+            "known_users": [dict(row) for row in self.list_known_users()],
+        }
+
+    def import_personal_data(self, data: dict, replace: bool = False) -> None:
+        """Import a validated backup atomically.
+
+        Merge updates matching keys/names and preserves unrelated local rows.
+        Replace clears all personal configuration before importing.
+        """
+        settings = data.get("settings", {})
+        keywords = data.get("keywords", [])
+        known_users = data.get("known_users", [])
+        with self.conn:
+            if replace:
+                self.conn.execute("DELETE FROM settings")
+                self.conn.execute("DELETE FROM keywords")
+                self.conn.execute("DELETE FROM known_users")
+            for key, value in settings.items():
+                self.conn.execute(
+                    "INSERT INTO settings(key, value) VALUES(?, ?) "
+                    "ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+                    (key, value),
+                )
+            for row in keywords:
+                self.conn.execute(
+                    """INSERT INTO keywords(keyword, enabled, case_sensitive, whole_word, color)
+                    VALUES(?, ?, ?, ?, ?) ON CONFLICT(keyword) DO UPDATE SET
+                    enabled=excluded.enabled, case_sensitive=excluded.case_sensitive,
+                    whole_word=excluded.whole_word, color=excluded.color""",
+                    (row["keyword"], row["enabled"], row["case_sensitive"], row["whole_word"], row["color"]),
+                )
+            for row in known_users:
+                self.conn.execute(
+                    """INSERT INTO known_users(username, gender, color) VALUES(?, ?, ?)
+                    ON CONFLICT(username) DO UPDATE SET gender=excluded.gender, color=excluded.color""",
+                    (row["username"], row.get("gender"), row.get("color")),
+                )
+
     def list_keywords(self) -> list[sqlite3.Row]:
         return self.conn.execute(
             """

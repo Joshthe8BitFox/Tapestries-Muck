@@ -18,8 +18,11 @@ env/
 # Build and packaging output
 build/
 dist/
+work/
+packaging/dmg/*-source.png
 *.egg-info/
 *.spec
+!TapestriesMuck.spec
 
 # Test and tooling caches
 .pytest_cache/

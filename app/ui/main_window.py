@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+import json
 import re
 
-from PySide6.QtCore import QEvent, Qt, QTimer, QUrl
+from PySide6.QtCore import QEvent, QFile, QIODevice, Qt, QTimer, QUrl
 from PySide6.QtGui import QAction, QColor, QDesktopServices, QFont, QFontDatabase, QKeyEvent, QTextCharFormat, QTextCursor
 from PySide6.QtWidgets import (
     QCheckBox,
@@ -12,6 +13,7 @@ from PySide6.QtWidgets import (
     QDialogButtonBox,
     QFormLayout,
     QFontComboBox,
+    QFileDialog,
     QHBoxLayout,
     QInputDialog,
     QLabel,
@@ -27,12 +29,15 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+from PySide6.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
 
 from ..database import Database
+from ..backup import read_backup, write_backup
 from ..network import MuckConnection
 from ..parser import KeywordRule, LineParser, ParsedLine
 from ..settings_store import ClientSettings, SettingsStore
 from ..version import __version__
+from ..updater import LATEST_RELEASE_API, RELEASES_URL, is_newer, select_asset
 
 
 URL_PATTERN = re.compile(r"\b(?:https?://|www\.)[^\s<>()]+[^\s<>().,!?:;'\"]", re.IGNORECASE)
@@ -559,6 +564,9 @@ class MainWindow(QMainWindow):
         self.background_who_timer = QTimer(self)
         self.background_who_timer.setInterval(self._background_who_interval_ms)
         self.background_who_timer.timeout.connect(self._send_background_who)
+        self.network_manager = QNetworkAccessManager(self)
+        self._update_download_file = None
+        QTimer.singleShot(1500, self.check_for_updates)
 
     def _build_ui(self) -> None:
         central = QWidget()
@@ -600,7 +608,114 @@ class MainWindow(QMainWindow):
         settings_action = QAction("Settings", self)
         settings_action.triggered.connect(self.open_settings)
         menu.addAction(settings_action)
+        menu.addSeparator()
+        export_action = QAction("Export Settings Backup…", self)
+        export_action.triggered.connect(self.export_settings)
+        menu.addAction(export_action)
+        import_action = QAction("Import Settings Backup…", self)
+        import_action.triggered.connect(self.import_settings)
+        menu.addAction(import_action)
+        help_menu = self.menuBar().addMenu("Help")
+        update_action = QAction("Check for Updates…", self)
+        update_action.triggered.connect(lambda: self.check_for_updates(manual=True))
+        help_menu.addAction(update_action)
         self._apply_font_settings()
+
+    def export_settings(self) -> None:
+        path, _ = QFileDialog.getSaveFileName(self, "Export Settings", "tapestries-settings.json", "JSON files (*.json)")
+        if not path:
+            return
+        try:
+            write_backup(self.db, path)
+            QMessageBox.information(self, "Settings Exported", "Your personal settings were saved successfully.")
+        except OSError as exc:
+            QMessageBox.critical(self, "Export Failed", str(exc))
+
+    def import_settings(self) -> None:
+        path, _ = QFileDialog.getOpenFileName(self, "Import Settings", "", "JSON files (*.json)")
+        if not path:
+            return
+        choice = QMessageBox(self)
+        choice.setWindowTitle("Import Settings")
+        choice.setText("How should the imported settings be applied?")
+        merge = choice.addButton("Merge", QMessageBox.ButtonRole.AcceptRole)
+        replace = choice.addButton("Replace Current", QMessageBox.ButtonRole.DestructiveRole)
+        choice.addButton(QMessageBox.StandardButton.Cancel)
+        choice.exec()
+        if choice.clickedButton() not in (merge, replace):
+            return
+        try:
+            self.db.import_personal_data(read_backup(path), replace=choice.clickedButton() is replace)
+            self.settings = self.settings_store.load()
+            self.host_edit.setText(self.settings.host)
+            self.port_spin.setValue(self.settings.port)
+            self.ssl_box.setChecked(self.settings.use_ssl)
+            self._load_persistent_state()
+            self._apply_font_settings()
+            QMessageBox.information(self, "Import Complete", "Your settings were imported successfully.")
+        except (ValueError, KeyError, TypeError) as exc:
+            QMessageBox.critical(self, "Import Failed", str(exc))
+
+    def check_for_updates(self, manual: bool = False) -> None:
+        request = QNetworkRequest(QUrl(LATEST_RELEASE_API))
+        request.setRawHeader(b"Accept", b"application/vnd.github+json")
+        request.setRawHeader(b"User-Agent", b"Tapestries-MUCK-Client")
+        reply = self.network_manager.get(request)
+        reply.finished.connect(lambda: self._update_check_finished(reply, manual))
+
+    def _update_check_finished(self, reply: QNetworkReply, manual: bool) -> None:
+        try:
+            if reply.error() != QNetworkReply.NetworkError.NoError:
+                if manual:
+                    QMessageBox.warning(self, "Update Check Failed", reply.errorString())
+                return
+            release = json.loads(bytes(reply.readAll()).decode("utf-8"))
+            tag = release.get("tag_name", "")
+            if not is_newer(tag, __version__):
+                if manual:
+                    QMessageBox.information(self, "No Updates", "You already have the latest version.")
+                return
+            asset = select_asset(release.get("assets", []))
+            box = QMessageBox(self)
+            box.setWindowTitle("Update Available")
+            box.setText(f"Tapestries MUCK Client {tag} is available. Would you like to update?")
+            download = box.addButton("Download Update", QMessageBox.ButtonRole.AcceptRole) if asset else None
+            releases = box.addButton("Open Downloads Page", QMessageBox.ButtonRole.ActionRole)
+            box.addButton("Not Now", QMessageBox.ButtonRole.RejectRole)
+            box.exec()
+            if download and box.clickedButton() is download:
+                self._download_update(asset)
+            elif box.clickedButton() is releases:
+                QDesktopServices.openUrl(QUrl(release.get("html_url") or RELEASES_URL))
+        except (ValueError, TypeError, json.JSONDecodeError) as exc:
+            if manual:
+                QMessageBox.warning(self, "Update Check Failed", str(exc))
+        finally:
+            reply.deleteLater()
+
+    def _download_update(self, asset: dict) -> None:
+        destination, _ = QFileDialog.getSaveFileName(self, "Save Update", asset.get("name", "Tapestries-update"))
+        if not destination:
+            return
+        self._update_download_file = QFile(destination)
+        if not self._update_download_file.open(QIODevice.OpenModeFlag.WriteOnly):
+            QMessageBox.critical(self, "Download Failed", self._update_download_file.errorString())
+            self._update_download_file = None
+            return
+        reply = self.network_manager.get(QNetworkRequest(QUrl(asset["browser_download_url"])))
+        reply.readyRead.connect(lambda: self._update_download_file.write(reply.readAll()))
+        reply.finished.connect(lambda: self._update_download_finished(reply, destination))
+
+    def _update_download_finished(self, reply: QNetworkReply, destination: str) -> None:
+        self._update_download_file.close()
+        self._update_download_file = None
+        if reply.error() == QNetworkReply.NetworkError.NoError:
+            QMessageBox.information(self, "Update Downloaded", "The update package is ready. Open it to finish updating.")
+            QDesktopServices.openUrl(QUrl.fromLocalFile(destination))
+        else:
+            QMessageBox.warning(self, "Download Failed", reply.errorString())
+            QDesktopServices.openUrl(QUrl(RELEASES_URL))
+        reply.deleteLater()
 
     def _wire_signals(self) -> None:
         self.connect_button.clicked.connect(self.connect_to_server)

@@ -5,7 +5,7 @@
 
 A small cross-platform desktop client for Tapestries MUCK, written in Python with PySide6.
 
-Current version: `0.2.2`
+Current development version: `0.3.1`
 
 ## Downloads
 
@@ -37,6 +37,23 @@ My username on Tapestries is `Zephie`. If you run into trouble, have feedback, o
   - look/smell notifications
 - Background `who` refresh to keep the known-user list current.
 - SQLite persistence for settings, keywords, and known users.
+- Versioned JSON backup and restore for personal settings, with merge or replace modes.
+- Automatic GitHub release checks with platform-aware update downloads and a Releases-page fallback.
+
+## Settings Backup
+
+Use **Config → Export Settings Backup…** to save general settings, keyword rules, and known-user customizations to a portable JSON file. Passwords and command history are not included.
+
+Use **Config → Import Settings Backup…** and choose:
+
+- **Merge** to update matching entries while keeping other local entries.
+- **Replace Current** to clear current personal settings and restore only the backup.
+
+Backups are portable across Windows, macOS, and Linux.
+
+## Updates
+
+The client checks the latest GitHub release shortly after startup. When a newer version exists, it asks before downloading the release asset that matches the current operating system and CPU. The downloaded package is opened so the user can complete the platform's normal installation process. If there is no matching asset—or a download fails—the GitHub Releases page is available as a clickable fallback.
 
 ## Project Layout
 
@@ -92,4 +109,9 @@ Passwords are not persisted by the app.
 - UI: `app/ui/main_window.py`
 - Tapestries output parsing: `app/parser.py`
 - Network socket layer: `app/network.py`
+- Cross-platform application icons: `assets/icons/` (`.ico` for Windows, `.icns` for macOS, and PNG sizes for Linux).
+
+## Building a Native App
+
+Install `requirements-build.txt`, then run `pyinstaller TapestriesMuck.spec`. The resulting native executable/app is named **TapestriesMuck** and uses the platform-specific icon. On macOS this produces `dist/TapestriesMuck.app`, avoiding the generic Python process name shown when running source directly.
 - SQLite schema and persistence helpers: `app/database.py`
