@@ -12,7 +12,7 @@ Current development version: `0.3.1`
 If setting up Python feels like too much fuss, compiled builds are available on the [GitHub Releases page](https://github.com/Joshthe8BitFox/Tapestries-Muck/releases).
 
 - macOS Apple Silicon: [download TapestriesMuck v0.3.1](https://github.com/Joshthe8BitFox/Tapestries-Muck/releases/download/v0.3.1/TapestriesMuck-v0.3.1-macos-arm64.dmg), open the DMG, and drag **TapestriesMuck** to **Applications**.
-- Windows: download the Windows ZIP from the [latest release that provides one](https://github.com/Joshthe8BitFox/Tapestries-Muck/releases), extract it, and run the included executable.
+- Windows: [download TapestriesMuck v0.3.1](https://github.com/Joshthe8BitFox/Tapestries-Muck/releases/download/v0.3.1/TapestriesMuck-v0.3.1-windows-x64.zip), extract the ZIP, and run `TapestriesMuck.exe`.
 - Linux: run from source using the setup instructions below. Native Linux packages are planned for a future release.
 
 ## Contact
