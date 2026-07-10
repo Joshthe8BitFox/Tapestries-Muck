@@ -9,10 +9,11 @@ Current development version: `0.3.1`
 
 ## Downloads
 
-If setting up Python feels like too much fuss, compiled builds are available on the GitHub Releases page.
+If setting up Python feels like too much fuss, compiled builds are available on the [GitHub Releases page](https://github.com/Joshthe8BitFox/Tapestries-Muck/releases).
 
-- macOS Apple Silicon: download `Tapestries-MUCK-Client-v0.2.2-macos-arm64.dmg`, open it, and drag the app to Applications.
-- Windows: download `Tapestries-MUCK-Client-v0.2.2-windows-x64.zip`, extract it, and run `Tapestries-MUCK-Client.exe`.
+- macOS Apple Silicon: [download TapestriesMuck v0.3.1](https://github.com/Joshthe8BitFox/Tapestries-Muck/releases/download/v0.3.1/TapestriesMuck-v0.3.1-macos-arm64.dmg), open the DMG, and drag **TapestriesMuck** to **Applications**.
+- Windows: download the Windows ZIP from the [latest release that provides one](https://github.com/Joshthe8BitFox/Tapestries-Muck/releases), extract it, and run the included executable.
+- Linux: run from source using the setup instructions below. Native Linux packages are planned for a future release.
 
 ## Contact
 
@@ -109,9 +110,9 @@ Passwords are not persisted by the app.
 - UI: `app/ui/main_window.py`
 - Tapestries output parsing: `app/parser.py`
 - Network socket layer: `app/network.py`
+- SQLite schema and persistence helpers: `app/database.py`
 - Cross-platform application icons: `assets/icons/` (`.ico` for Windows, `.icns` for macOS, and PNG sizes for Linux).
 
 ## Building a Native App
 
 Install `requirements-build.txt`, then run `pyinstaller TapestriesMuck.spec`. The resulting native executable/app is named **TapestriesMuck** and uses the platform-specific icon. On macOS this produces `dist/TapestriesMuck.app`, avoiding the generic Python process name shown when running source directly.
-- SQLite schema and persistence helpers: `app/database.py`
